@@ -1,5 +1,7 @@
 # nuaactf-2017-xss-framework
 
+> 该分支为使用 `phantomjs` 的版本，查看 `puppeteer` 版本请切换到 `puppeteer` 分支。
+
 ## 简介
 
 这是为 nuaactf 2017 的 xss 题目准备的测试项目，基于此项目可以快速生成一道 xss 的测试题目。xss 的目标均为 `alert(1)`，且其中的 1 必须为数字 1。
