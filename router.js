@@ -1,25 +1,25 @@
-var fs = require('fs');
-var check = require('./checker').check;
+const fs = require('fs');
+const check = require('./checker').check;
 
 function route(pathname, req, res) {
-    var files = ['/main.css', '/main.js'];
-    var mimeTypes = {
+    const files = ['/main.css', '/main.js'];
+    const mimeTypes = {
         css: 'text/css',
         js: 'application/javascript',
     };
     if (files.indexOf(pathname) >= 0) {
-        fs.readFile('.' + pathname, function (err, data) {
+        fs.readFile('.' + pathname, (err, data) => {
             if (err) {
                 throw err;
             } else {
-                var ext = pathname.split('.')[1];
+                const ext = pathname.split('.')[1];
                 res.writeHead(200, { 'Content-Type': mimeTypes[ext] });
                 res.write(data);
                 res.end();
             }
         });
     } else if (/^\/[12]$/.test(pathname)) {
-        fs.readFile('./template.html', function (err, data) {
+        fs.readFile('./template.html', (err, data) => {
             if (err) {
                 throw err;
             } else {
@@ -33,11 +33,9 @@ function route(pathname, req, res) {
         });
     } else if (pathname === '/check') {
         res.writeHead(200, { 'Content-Type': 'text/html' });
-        var post = '';
-        req.addListener('data', function (chunk) {
-            post += chunk;
-        });
-        req.addListener('end', function () {
+        let post = '';
+        req.addListener('data', chunk => post += chunk);
+        req.addListener('end', () => {
             try {
                 post = JSON.parse(post);
                 if (post.id && post.ans) {

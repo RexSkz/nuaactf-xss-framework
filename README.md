@@ -1,6 +1,6 @@
 # nuaactf-2017-xss-framework
 
-> 该分支为使用 `phantomjs` 的版本，查看 `puppeteer` 版本请切换到 `puppeteer` 分支。
+> 该分支为使用 `puppeteer` 的版本，查看 `phantomjs` 版本请切换到 `master` 分支。
 
 ## 简介
 
@@ -19,7 +19,7 @@ npm start
 
 ## 测试流程
 
-首先先使用前端 check，前端将 alert 函数覆盖成了自己写的判断函数，如果前端 check 通过则运行后端 check，后端也用类似的思路调用 phantomjs 来测试是否有 xss。
+首先先使用前端 check，前端将 alert 函数覆盖成了自己写的判断函数，如果前端 check 通过则运行后端 check，后端也用类似的思路调用 puppeteer 来测试是否有 xss。
 
 ## 题目编写
 

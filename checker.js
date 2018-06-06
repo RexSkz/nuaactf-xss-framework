@@ -1,76 +1,57 @@
-function check(input, id, res) {
-    var phantom = require('phantom');
-    var phInstance = null;
-    var exitted = false;
-    phantom.create()
-        .then(instance => {
-            phInstance = instance;
-            return instance.createPage();
-        })
-        .then(page => {
-            var index = parseInt(id) - 1;
-            // TODO: use page to check input for problem id
-            var script = (`
-function () {
-    var input = ${JSON.stringify(input)};
-    var outputStr = '';
-    function output(obj) {
-        outputStr = JSON.stringify(obj);
-    }
-    window.onerror = function (a) {
-        output({ error: a.toString() });
-    }
-    window.alert = function (a) {
+const puppeteer = require('puppeteer');
+
+function script(problem, input) {
+    let outputObj = '';
+    const output = obj => outputObj = obj;
+    window.onerror = a => output({ error: a.toString() });
+    window.alert = a => {
         if (a === 1) output({ success: 1 });
-        else if (a == 1) output({ error: "You should alert *NUMBER* 1." });
-        else {
-            output({ error: "Server check failed, you need to alert 1." });
-        }
+        else if (a == 1) output({ error: 'You should alert *NUMBER* 1.' });
+        else output({ error: 'Server check failed, you need to alert 1.' });
     };
-// problem text start
-${global.problemText[index]}
-// problem text end
+    // now we have a `check` function
+    eval(problem);
     try {
         check(input);
     } catch (e) {
-        output({ error: e.toString().split("\\n")[0] });
+        output({ error: e.toString().split('\\n')[0] });
     } finally {
-        return outputStr;
+        return outputObj;
     }
-}`);
-            var evaluation = page.evaluateJavaScript(script);
-            evaluation.then(function (html) {
-                html = JSON.parse(html);
-                if (html.success) {
-                    res.write('Check passed, flag: ' + global.flag[index]);
-                    res.end();
-                } else {
-                    res.write(html.error);
-                    res.end();
-                }
-                if (!exitted) {
-                    phInstance.exit();
-                    exitted = true;
-                }
-            });
-        })
-        .catch(error => {
-            console.log(error); // eslint-disable-line no-console
-            if (!exitted) {
-                phInstance.exit();
-                exitted = true;
-                res.write('PhantomJS error');
-                res.end();
+}
+
+let browser = null;
+
+async function check(input, id, res) {
+    if (!browser) {
+        browser = await puppeteer.launch();
+    }
+    const page = await browser.newPage();
+    const index = (id | 0) - 1;
+    const problem = global.problemText[index];
+    const racedPromise = Promise.race([
+        new Promise(resolve => setTimeout(() => resolve(false), 5000)),
+        page.evaluate(script, problem, input)
+    ]);
+    try {
+        const output = await racedPromise;
+        if (!output) {
+            await browser.close();
+            browser = null;
+            res.write('Timeout');
+        } else {
+            const result = output;
+            if (result.success) {
+                res.write('Check passed, flag: ' + global.flag[index]);
+            } else {
+                res.write(result.error);
             }
-        });
-    setTimeout(function () {
-        if (!exitted) {
-            phInstance.exit();
-            exitted = true;
-            res.write('TLE');
-            res.end();
         }
-    }, 5000);
+    } catch (e) {
+        console.log(e); // eslint-disable-line no-console
+        res.write('Puppeteer error');
+    }
+    res.end();
 }
 
 exports.check = check;

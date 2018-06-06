@@ -9,7 +9,6 @@
   "author": "Rex Zeng",
   "license": "SATA",
   "dependencies": {
-    "phantom": "^4.0.2",
-    "phantomjs": "^2.1.7"
+    "puppeteer": "^1.4.0"
   }
 }

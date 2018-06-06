@@ -1,5 +1,5 @@
-var server = require('./server');
-var router = require('./router');
+const server = require('./server');
+const router = require('./router');
 
 global.problemText = [
     [
